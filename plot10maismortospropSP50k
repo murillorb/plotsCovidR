@@ -1,0 +1,10 @@
+library(covid19br)
+library(tidyverse)
+library(ggplot2)
+cvdB <- covid19br::downloadCovid19(level="cities")
+cvdB <- cvdB %>% filter(state=="SP")
+cFM <- cvdB %>% group_by(city) %>% filter(date >= as.Date("2021-02-21") & date <= as.Date("2021-03-20"))
+cFM <- cFM %>% group_by(city) %>% mutate(cpm = max(accumCases)-min(accumCases)) %>% mutate(dpm = max(accumDeaths)-min(accumDeaths))
+cFM1 <- cFM %>% filter(date==max(date))
+p1 <- cFM1 %>% mutate(prop = dpm/pop) %>%  mutate(city = factor(city, levels=city)) %>% arrange(-prop) %>% filter(pop > 50000) %>% head(10) %>% ggplot(aes(x=city,y=prop)) + geom_col() + xlab("Cidade (> 50000 habitantes, SP)") +ylab("Mortos entre 21/02 e 20/03 divididos pela população") + coord_flip()
+p1
