@@ -2,5 +2,6 @@ library(tidyverse)
 library(ggplot2)
 library(covid19br)
 cvdC <- covid19br::downloadCovid19(level = "cities")
+#Basta inserir a cidade no filter. Cuidado com cidades com nomes iguais em estados diferentes, eu fiz este script em especial pensando em um estado só.
 p2 <- cvdC %>% filter(city %in% c("Ilhabela","São Paulo", "São João da Boa Vista", "Bauru")) %>% ggplot(aes(x = date, color = factor(city))) + geom_line(aes(y = accumDeaths/pop, size = 0.5)) + geom_vline(xintercept = as.Date("2021-01-01")) + ylab("Mortes/população")+xlab("Data")+labs(color= "Cidade", size = element_blank())
 p2
