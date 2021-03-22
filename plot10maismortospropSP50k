@@ -1,14 +1,13 @@
-#As dez cidades com a maior relação mortos no intervalo dado / população da cidade.
+#As dez cidades com a maior relação mortos no intervalo dado / população da cidade. Repare que eu tentei muito deixar ordenado, mas por alguma razão não está mantendo a ordem...
 library(covid19br)
 library(tidyverse)
 library(ggplot2)
 cvdB <- covid19br::downloadCovid19(level="cities")
-cvdB <- cvdB %>% filter(state=="SP")
-cFM <- cvdB %>% group_by(city) %>% filter(date >= as.Date("2021-02-21") & date <= as.Date("2021-03-20"))
+cFM <- cvdB  %>% mutate(citystate = paste0(city,"/",state)) %>% filter(date >= as.Date("2021-02-21") & date <= as.Date("2021-03-20"))
 #Considerando que o número acumulado de casos e de mortes é inerentemente crescente, posso pegar o primeiro e o último dia com max e min.
 #A possibilidade de casos cancelados acontece em alguns casos raros, entretanto não deve mudar os resultados de comparações entre cidades de populações maiores.
-cFM <- cFM %>% group_by(city) %>% mutate(cpm = max(accumCases)-min(accumCases)) %>% mutate(dpm = max(accumDeaths)-min(accumDeaths))
+cFM <- cFM %>% group_by(citystate) %>% mutate(cpm = max(accumCases)-min(accumCases)) %>% mutate(dpm = max(accumDeaths)-min(accumDeaths))
 cFM1 <- cFM %>% filter(date==max(date))
 #Trocando -prop por prop, pegará as cidades com menor proporção de mortos no período
-p1 <- cFM1 %>% mutate(prop = dpm/pop) %>%  arrange(-prop) %>% mutate(city = factor(city, levels=city))  %>% filter(pop > 50000) %>% head(10) %>% ggplot(aes(x=reorder(city,prop),y=prop)) + geom_col() + xlab("Cidade (> 50000 habitantes, SP)") +ylab("Mortos entre 21/02 e 20/03 divididos pela população") + coord_flip()
+p1 <- cFM1 %>% mutate(prop = dpm/pop) %>%  arrange(-prop)   %>% filter(pop > 50000) %>% head(10) %>% ggplot(aes(x=reorder(citystate,prop),y=prop)) + geom_col() + xlab("Cidade (> 50000 habitantes, SP)") +ylab("Mortos entre 21/02 e 20/03 divididos pela população") + coord_flip()
 p1
